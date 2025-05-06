@@ -22,6 +22,7 @@ public class MainServer {
         server.registerHost("hostQ.local", "192.168.0.17");
         server.registerHost("hostR.local", "192.168.0.18");
 
+        // Alguns exemplos basicos para teste.
 
         try {
             server.start(); // Inicia o servidor
@@ -30,4 +31,6 @@ public class MainServer {
         }
     }
 }
+
+// Se possivel no futuro adicionar persistencia de arquivos no servidor, para manter os DNS e IPs já registrados
 

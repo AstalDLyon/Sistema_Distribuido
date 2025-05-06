@@ -28,7 +28,7 @@ public class nomeServidor {
             Socket client = serverSocket.accept(); // Espera uma conexão
             new Thread(() -> handleClient(client)).start(); // Cria nova thread para cada cliente
         }
-    }
+    } // Talvez usar um ExecutorService para gerenciar cada thread
 
     // Processa a requisição do cliente
     private void handleClient(Socket clientSocket) {

@@ -13,7 +13,7 @@ public class MainClient {
             String line = scanner.nextLine();
             if (line.equalsIgnoreCase("sair")) break;
 
-            String[] parts = line.split(" ");
+            String[] parts = line.split(" "); // Divide em parte usando o espaço.
             if (parts.length == 2 && parts[0].equalsIgnoreCase("LOOKUP")) {
                 String result = resolver.lookup(parts[1]);
                 System.out.println("Resposta: " + result);
