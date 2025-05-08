@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 public class nomeServidor {
     private final int port;
     private final Map<String, String> hostTable = new HashMap<>();
-    private static final String FILE_NAME = "registros.txt";
+    private static final String FILE_NAME = "src/main/resources/registros.txt";
     private static final Logger logger = Logger.getLogger(nomeServidor.class.getName());
     private final ExecutorService executorService;
     private volatile boolean isRunning = true;
@@ -21,10 +21,22 @@ public class nomeServidor {
     }
 
     // Adiciona um novo nome e IP no servidor
-    public void registerHost(String hostname, String ip) {
-        hostTable.put(hostname, ip);
-        System.out.println("Registrado: " + hostname + " -> " + ip);
+    public boolean registerHost(String hostname, String ip) {
+        synchronized (hostTable) {
+            // Verifica se o hostname ou IP já existe na tabela em memória
+            if (hostTable.containsKey(hostname) || hostTable.containsValue(ip)) {
+                logger.warning("Hostname ou IP já existe na tabela: " + hostname + " -> " + ip);
+                return false;
+            }
+
+            // Se não existir duplicata, registra na tabela e no arquivo
+            hostTable.put(hostname, ip);
+            appendToFile(hostname, ip);
+            System.out.println("Registrado: " + hostname + " -> " + ip);
+            return true;
+        }
     }
+
 
     // Inicia o servidor e escuta pedidos
     public void start() {
@@ -88,13 +100,8 @@ public class nomeServidor {
             out.println(ip != null ? ip : "Não encontrado");
 
         } else if (parts.length == 3 && parts[0].equalsIgnoreCase("REGISTER")) {
-            synchronized (hostTable) {
-                hostTable.put(parts[1], parts[2]);
-                appendToFile(parts[1], parts[2]); // Salva no arquivo
-            }
-            out.println("Registrado");
-            System.out.println("Novo registro: " + parts[1] + " -> " + parts[2]);
-
+            boolean registrado = registerHost(parts[1], parts[2]);
+            out.println(registrado ? "Registrado" : "Hostname ou IP já existe");
         } else {
             out.println("Comando Inválido");
         }
@@ -105,13 +112,45 @@ public class nomeServidor {
 }
 
     private void appendToFile(String hostname, String ip) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true))) {
-            writer.write(hostname + " " + ip);
-            writer.newLine();
-        } catch (IOException e) {
-            logger.severe("Erro ao salvar no registro: " + e.getMessage());
+        synchronized (hostTable) {
+            // Verifica se o arquivo existe, se não, cria
+            File file = new File(FILE_NAME);
+            try {
+                if (!file.getParentFile().exists()) {
+                    if (!file.getParentFile().mkdirs()) {
+                        logger.severe("Falha ao criar diretórios necessários");
+                        return;
+                    }
+                }
+
+                if (!file.exists() && !file.createNewFile()) {
+                    logger.severe("Falha ao criar arquivo de registros");
+                    return;
+                }
+            } catch (IOException e) {
+                logger.severe("Erro ao criar arquivo: " + e.getMessage());
+                return;
+            }
+
+
+            // Verifica duplicatas
+            if (HostOuIpExiste(hostname, ip)) {
+                logger.warning("Hostname ou IP já existe no arquivo: " + hostname + " -> " + ip);
+                return;
+            }
+
+
+            // Se não existir duplicata, adiciona ao arquivo
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true))) {
+                writer.write(hostname + " " + ip);
+                writer.newLine();
+                System.out.println("Registro salvo com sucesso: " + hostname + " -> " + ip);
+            } catch (IOException e) {
+                logger.severe("Erro ao salvar no registro: " + e.getMessage());
+            }
         }
     }
+
 
     private void loadFromFile() {
         File file = new File(FILE_NAME);
@@ -130,4 +169,21 @@ public class nomeServidor {
             logger.severe("Erro ao carregar registros: " + e.getMessage());
         }
     }
+    private boolean HostOuIpExiste(String hostname, String ip) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.trim().split("\\s+");
+                if (parts.length == 2) {
+                    if (parts[0].equals(hostname) || parts[1].equals(ip)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            logger.severe("Erro ao verificar duplicatas: " + e.getMessage());
+        }
+        return false;
+    }
+
 }
