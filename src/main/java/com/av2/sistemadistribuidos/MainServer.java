@@ -1,7 +1,9 @@
 package com.av2.sistemadistribuidos;
+import java.util.logging.Logger;
 
 public class MainServer {
     public static void main(String[] args) {
+        final Logger logger = Logger.getLogger(MainServer.class.getName());
         nomeServidor server = new nomeServidor(12345); // Porta do servidor
         server.registerHost("hostA.local", "192.168.0.1");
         server.registerHost("hostB.local", "192.168.0.2");
@@ -27,7 +29,7 @@ public class MainServer {
         try {
             server.start(); // Inicia o servidor
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.severe("Erro ao aceitar conexão: " + e.getMessage());
         }
     }
 }
