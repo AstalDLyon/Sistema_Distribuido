@@ -1,6 +1,10 @@
-Projeto pra faculdade, por enquanto tem registro de IP com nome e consulta com sockets, com o tempo gostaria de adicionar mais funcionalidades como:
+Projeto pra faculdade,  com o tempo gostaria de adicionar mais funcionalidades como:
 
-Persistência em arquivo.
+ Registro de IP com nome. (Feito)
+ 
+ Consulta com sockets. (Feito)
+
+Persistência em arquivo. (Feito)
 
 Replicação entre servidores (servidor distribuído).
 
@@ -10,7 +14,7 @@ Autenticação básica.
 
 Interface de testes ou painel web (opcional).
 
-ExecutorService para controlar acessos simultaneos.
+ExecutorService para controlar acessos simultaneos. (Feito)
 
 Timeouts e logs.
 
