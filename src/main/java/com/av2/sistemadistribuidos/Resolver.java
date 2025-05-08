@@ -5,8 +5,8 @@ import java.net.*;
 
 // O resolver é a parte mais importante do codigo no momento, tome cuidado
 public class Resolver {
-    private String serverAddress;
-    private int serverPort;
+    private final String serverAddress;
+    private final int serverPort;
 
     public Resolver(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
@@ -17,7 +17,7 @@ public class Resolver {
         try (
                 Socket socket = new Socket(serverAddress, serverPort); // Estabelece uma conexão usando socket
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true); // para enviar dados para o servidor
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())); // para ouvir a resposta
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())) // para ouvir a resposta
         ) {
             out.println(command);
             return in.readLine();
