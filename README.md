@@ -10,7 +10,7 @@ Replicação entre servidores (servidor distribuído).
 
 Cache no cliente.
 
-Autenticação básica.
+Autenticação básica. (em execução)
 
 Interface de testes ou painel web (opcional).
 
