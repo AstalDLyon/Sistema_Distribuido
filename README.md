@@ -24,7 +24,7 @@ IMPORTANTE:
 Cada classe tem sua responsabilidade bem definida seguindo princípios SOLID:
 - **MainClient/MainServer**: Pontos de entrada
 - **nomeServidor**: Lógica principal do servidor
-- *Resolver**: Cliente e comunicação
+- **Resolver**: Cliente e comunicação
 - **FileManager**: Persistência
 - **ConfigManager**: Configurações
 
