@@ -12,6 +12,11 @@ public class FileManager {
         this.fileName = fileName;
     }
 
+    /* salvarRegistro(hostname, ip):
+        Salva novo registro no arquivo
+        Thread-safe usando synchronized
+        Verifica duplicatas antes de salvar
+*/
     public void salvarRegistro(String hostname, String ip) {
         synchronized (this) {
             criarArquivoSeNecessario();
@@ -31,6 +36,10 @@ public class FileManager {
         }
     }
 
+    /* carregarRegistros(hostTable):
+        Carrega registros salvos para memória
+        Popula hostTable com dados do arquivo
+*/
     public void carregarRegistros(Map<String, String> hostTable) {
         File file = new File(fileName);
         if (!file.exists()) return;
@@ -49,6 +58,11 @@ public class FileManager {
         }
     }
 
+    /*
+    verificarDuplicata(hostname, ip):
+    Verifica se hostname ou IP já existe
+    Previne registros duplicados
+     */
     private boolean verificarDuplicata(String hostname, String ip) {
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
@@ -65,6 +79,11 @@ public class FileManager {
         }
         return false;
     }
+
+    /*  criarArquivoSeNecessario():
+        Cria arquivo e diretórios se não existirem
+        Garante existência da estrutura necessária
+     */
 
     private void criarArquivoSeNecessario() {
         File file = new File(fileName);
