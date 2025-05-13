@@ -2,6 +2,13 @@ package com.av2.sistemadistribuidos;
 
 import java.util.Scanner;
 
+/**
+ * Classe principal do cliente que provê interface de linha de comando
+ * - Permite ao usuário registrar hostnames e IPs
+ * - Permite consultar IPs por hostname
+ * - Loop principal que processa comandos REGISTER e LOOKUP
+ * - Usa a classe Resolver para comunicação com o servidor
+ */
 public class MainClient {
     public static void main(String[] args) {
         Resolver resolver = new Resolver("localhost", 12345);
@@ -27,5 +34,3 @@ public class MainClient {
         scanner.close();
     }
 }
-
-

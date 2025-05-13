@@ -13,6 +13,11 @@ public class Resolver {
         this.serverPort = serverPort;
     }
 
+    // sendCommand(command):
+    // Estabelece conexão socket com servidor
+    // Envia comando
+    // Recebe e retorna resposta
+
     public String sendCommand(String command) {
         try (
                 Socket socket = new Socket(serverAddress, serverPort); // Estabelece uma conexão usando socket
@@ -26,9 +31,16 @@ public class Resolver {
         }
     }
 
+    // lookup(hostname):
+    //  Envia comando LOOKUP
+    // Retorna IP associado ao hostname
     public String lookup(String hostname) {
         return sendCommand("LOOKUP " + hostname);
     }
+
+    // register(hostname, ip):
+    // Envia comando REGISTER
+    // Registra novo par hostname->IP
 
     public String register(String hostname, String ip) {
         return sendCommand("REGISTER " + hostname + " " + ip);

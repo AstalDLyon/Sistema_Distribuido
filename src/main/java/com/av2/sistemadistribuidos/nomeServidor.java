@@ -6,25 +6,31 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
+
+
 public class nomeServidor {
-    private final int port;
-    private final Map<String, String> hostTable = new HashMap<>();
-    private static final String FILE_NAME = "src/main/resources/registros.txt";
+    private final int port; // port: porta em que o servidor escuta
+    private final Map<String, String> hostTable = new HashMap<>(); // hostTable: mapa que armazena pares hostname->IP
     private static final Logger logger = Logger.getLogger(nomeServidor.class.getName());
-    private final ExecutorService executorService;
+    private final ExecutorService executorService; // executorService: gerencia pool de threads para requisições concorrentes
     private volatile boolean isRunning = true;
-    private final FileManager fileManager;
+    private final FileManager fileManager; // fileManager: gerencia persistência dos registros
+    private final ConfigManager config; // config: gerencia configurações do servidor
 
 
-    public nomeServidor(int port) {
-        this.port = port;
-        // Cria um pool de threads com número fixo de threads
-        this.executorService = Executors.newFixedThreadPool(10);
-        this.fileManager = new FileManager(FILE_NAME);
+    public nomeServidor() {
+        this.config = ConfigManager.getInstance();
+        this.port = config.getServerPort();
+        this.executorService = Executors.newFixedThreadPool(config.getThreadPoolSize());
+        this.fileManager = new FileManager(config.getFilePath());
+
 
     }
 
-    // Adiciona um novo nome e IP no servidor
+    //  Registra novo par hostname->IP
+    //  Verifica duplicatas
+    //  Persiste registro em arquivo
+    //  Thread-safe usando synchronized
     public boolean registerHost(String hostname, String ip) {
         synchronized (hostTable) {
             // Verifica se o hostname ou IP já existe na tabela em memória
@@ -46,11 +52,13 @@ public class nomeServidor {
     public void start() {
         fileManager.carregarRegistros(hostTable);// Carrega registros salvos do arquivo
 
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Servidor de nomes iniciado na porta " + port);
-            serverSocket.setSoTimeout(1000); // Timeout de 1 segundo para accept()
+        try (ServerSocket serverSocket = new ServerSocket(port)) { // Inicia socket servidor
 
-            while (isRunning) {
+            System.out.println("Servidor iniciado na porta " + port);
+            serverSocket.setSoTimeout(config.getServerTimeout());// Timeout de 1 segundo para accept()
+
+            while (isRunning) { // Aceita conexões de clientes
+
                 try {
                     Socket client = serverSocket.accept();
                     executorService.submit(() -> handleClient(client));
@@ -68,7 +76,7 @@ public class nomeServidor {
         }
     }
 
-    // Método para desligar o servidor graciosamente
+    //Méto-do para desligar o servidor
     public void shutdown() {
         isRunning = false;
         executorService.shutdown();
@@ -82,6 +90,11 @@ public class nomeServidor {
         }
         System.out.println("Servidor encerrado");
     }
+
+    //handleClient(clientSocket):
+    // - Processa requisições individuais
+    //  Parse de comandos LOOKUP e REGISTER
+    // Envia respostas ao cliente
 
     private void handleClient(Socket clientSocket) {
     try (
