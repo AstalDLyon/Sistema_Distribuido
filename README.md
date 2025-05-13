@@ -1,30 +1,32 @@
-Projeto pra faculdade,  com o tempo gostaria de adicionar mais funcionalidades como:
+# Projeto de Sistema Distribuído
 
- Registro de IP com nome. (Feito)
- 
- Consulta com sockets. (Feito)
+## 📌 Arquitetura baseada nos princípios SOLID
 
-Persistência em arquivo. (Feito)
+Cada classe possui uma responsabilidade única e bem definida:
 
-Replicação entre servidores (servidor distribuído).
+- **MainClient / MainServer** – Pontos de entrada do sistema
+- **nomeServidor** – Lógica principal do servidor
+- **Resolver** – Cliente e comunicação via sockets
+- **FileManager** – Persistência de dados em arquivo
+- **ConfigManager** – Configurações globais (Singleton, Thread-safe)
 
-Cache no cliente.
+---
 
-Autenticação básica.
+## ✅ Funcionalidades
 
-Interface de testes ou painel web (opcional).
+- [x] Registro de IP com nome  
+- [x] Consulta com sockets  
+- [x] Persistência em arquivo  
+- [ ] Replicação entre servidores (servidor distribuído)  
+- [x] Configurações com conformidade Thread-safe  
+- [ ] Cache no cliente  
+- [ ] Autenticação básica  
+- [ ] Interface de testes ou painel web (opcional)  
+- [x] ExecutorService para controlar acessos simultâneos  
+- [x] Timeouts  
+- [ ] Logs  
+- [ ] Consulta distribuída com resposta do primeiro servidor disponível  
 
-ExecutorService para controlar acessos simultaneos. (Feito)
+---
 
-Timeouts e logs.
-
-Poder enviar uma consulta que atinge vários servidores e retorna o primeiro que responder.
-
-IMPORTANTE:
-Cada classe tem sua responsabilidade bem definida seguindo princípios SOLID:
-- **MainClient/MainServer**: Pontos de entrada
-- **nomeServidor**: Lógica principal do servidor
-- **Resolver**: Cliente e comunicação
-- **FileManager**: Persistência
-- **ConfigManager**: Configurações
-
+Este projeto é parte de um trabalho acadêmico, e novas funcionalidades serão adicionadas ao longo do tempo.
