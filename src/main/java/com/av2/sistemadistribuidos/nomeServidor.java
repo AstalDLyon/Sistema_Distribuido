@@ -13,11 +13,15 @@ public class nomeServidor {
     private static final Logger logger = Logger.getLogger(nomeServidor.class.getName());
     private final ExecutorService executorService;
     private volatile boolean isRunning = true;
+    private final FileManager fileManager;
+
 
     public nomeServidor(int port) {
         this.port = port;
         // Cria um pool de threads com número fixo de threads
         this.executorService = Executors.newFixedThreadPool(10);
+        this.fileManager = new FileManager(FILE_NAME);
+
     }
 
     // Adiciona um novo nome e IP no servidor
@@ -31,7 +35,7 @@ public class nomeServidor {
 
             // Se não existir duplicata, registra na tabela e no arquivo
             hostTable.put(hostname, ip);
-            appendToFile(hostname, ip);
+            fileManager.salvarRegistro(hostname, ip);
             System.out.println("Registrado: " + hostname + " -> " + ip);
             return true;
         }
@@ -40,7 +44,7 @@ public class nomeServidor {
 
     // Inicia o servidor e escuta pedidos
     public void start() {
-        loadFromFile(); // Carrega registros salvos do arquivo
+        fileManager.carregarRegistros(hostTable);// Carrega registros salvos do arquivo
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Servidor de nomes iniciado na porta " + port);
@@ -111,79 +115,6 @@ public class nomeServidor {
     }
 }
 
-    private void appendToFile(String hostname, String ip) {
-        synchronized (hostTable) {
-            // Verifica se o arquivo existe, se não, cria
-            File file = new File(FILE_NAME);
-            try {
-                if (!file.getParentFile().exists()) {
-                    if (!file.getParentFile().mkdirs()) {
-                        logger.severe("Falha ao criar diretórios necessários");
-                        return;
-                    }
-                }
 
-                if (!file.exists() && !file.createNewFile()) {
-                    logger.severe("Falha ao criar arquivo de registros");
-                    return;
-                }
-            } catch (IOException e) {
-                logger.severe("Erro ao criar arquivo: " + e.getMessage());
-                return;
-            }
-
-
-            // Verifica duplicatas
-            if (HostOuIpExiste(hostname, ip)) {
-                logger.warning("Hostname ou IP já existe no arquivo: " + hostname + " -> " + ip);
-                return;
-            }
-
-
-            // Se não existir duplicata, adiciona ao arquivo
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true))) {
-                writer.write(hostname + " " + ip);
-                writer.newLine();
-                System.out.println("Registro salvo com sucesso: " + hostname + " -> " + ip);
-            } catch (IOException e) {
-                logger.severe("Erro ao salvar no registro: " + e.getMessage());
-            }
-        }
-    }
-
-
-    private void loadFromFile() {
-        File file = new File(FILE_NAME);
-        if (!file.exists()) return;
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.trim().split("\\s+");
-                if (parts.length == 2) {
-                    hostTable.put(parts[0], parts[1]);
-                    System.out.println("Carregado: " + parts[0] + " -> " + parts[1]);
-                }
-            }
-        } catch (IOException e) {
-            logger.severe("Erro ao carregar registros: " + e.getMessage());
-        }
-    }
-    private boolean HostOuIpExiste(String hostname, String ip) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.trim().split("\\s+");
-                if (parts.length == 2) {
-                    if (parts[0].equals(hostname) || parts[1].equals(ip)) {
-                        return true;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            logger.severe("Erro ao verificar duplicatas: " + e.getMessage());
-        }
-        return false;
-    }
 
 }
