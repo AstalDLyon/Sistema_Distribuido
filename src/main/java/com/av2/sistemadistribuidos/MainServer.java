@@ -1,4 +1,6 @@
 package com.av2.sistemadistribuidos;
+import java.io.File;
+import java.sql.SQLOutput;
 import java.util.logging.Logger;
 
 /**
