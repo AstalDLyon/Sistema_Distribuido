@@ -3,12 +3,12 @@ package com.av2.sistemadistribuidos;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 public class ConfigManager {
-    private static final Logger logger = Logger.getLogger(ConfigManager.class.getName());
     private static final Properties properties = new Properties();
     private static ConfigManager instance;
+    private final LogManager logManager = LogManager.getInstance();
+
 
     private ConfigManager() { // impede criação direta de instancia
         loadProperties();
@@ -51,12 +51,12 @@ public class ConfigManager {
         try (InputStream input = getClass().getClassLoader()
                 .getResourceAsStream("config.properties")) {
             if (input == null) {
-                logger.severe("Arquivo config.properties não encontrado!");
+                logManager.severe("Arquivo config.properties não encontrado!");
                 return;
             }
             properties.load(input);
         } catch (IOException e) {
-            logger.severe("Erro ao carregar configurações: " + e.getMessage());
+            logManager.severe("Erro ao carregar configurações: " + e.getMessage());
         }
     }
 
