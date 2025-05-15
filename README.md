@@ -9,6 +9,8 @@ Cada classe possui uma responsabilidade única e bem definida:
 - **Resolver** – Cliente e comunicação via sockets
 - **FileManager** – Persistência de dados em arquivo
 - **ConfigManager** – Configurações globais (Singleton, Thread-safe)
+- **LogManager** – Classe que gerencia logs
+- **LogManager** – Classe que gerencia logs
 
 ---
 
@@ -24,7 +26,7 @@ Cada classe possui uma responsabilidade única e bem definida:
 - [ ] Interface de testes ou painel web (opcional)  
 - [x] ExecutorService para controlar acessos simultâneos  
 - [x] Timeouts  
-- [ ] Logs  
+- [x] Logs  
 - [ ] Consulta distribuída com resposta do primeiro servidor disponível  
 
 ---
