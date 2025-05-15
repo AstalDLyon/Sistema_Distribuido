@@ -7,10 +7,14 @@ import java.net.*;
 public class Resolver {
     private final String serverAddress;
     private final int serverPort;
+    private final LogManager logManager;
+
 
     public Resolver(String serverAddress, int serverPort) {
+        this.logManager = LogManager.getInstance();
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
+        logManager.info(String.format("Resolver iniciado com endereço %s:%d", serverAddress, serverPort));
     }
 
     // sendCommand(command):
@@ -19,31 +23,89 @@ public class Resolver {
     // Recebe e retorna resposta
 
     public String sendCommand(String command) {
-        try (
-                Socket socket = new Socket(serverAddress, serverPort); // Estabelece uma conexão usando socket
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true); // para enviar dados para o servidor
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())) // para ouvir a resposta
-        ) {
-            out.println(command);
-            return in.readLine();
-        } catch (IOException e) { // capturar a mensagem de erro
-            return "ERRO: " + e.getMessage();
+        logManager.fine("Iniciando envio de comando: " + command);
+
+        Socket socket = null;
+        int tentativas = 0;
+        final int MAX_TENTATIVAS = 3;
+
+        while (tentativas < MAX_TENTATIVAS) {
+            try {
+                socket = new Socket();
+                socket.connect(
+                        new InetSocketAddress(serverAddress, serverPort),
+                        5000  // 5 segundos de timeout
+                );
+                logManager.fine("Conexão estabelecida com servidor");
+
+                try (PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                     BufferedReader in = new BufferedReader(
+                             new InputStreamReader(socket.getInputStream())
+                     )) {
+
+                    out.println(command);
+                    logManager.fine("Comando enviado: " + command);
+
+                    String response = in.readLine();
+                    logManager.fine("Resposta recebida: " + response);
+
+                    return response;
+                }
+            } catch (IOException e) {
+                tentativas++;
+                logManager.warning(String.format(
+                        "Tentativa %d de %d falhou: %s",
+                        tentativas, MAX_TENTATIVAS, e.getMessage()
+                ));
+
+                if (tentativas == MAX_TENTATIVAS) {
+                    String errorMsg = "Erro de comunicação após " +
+                            MAX_TENTATIVAS + " tentativas: " + e.getMessage();
+                    logManager.severe(errorMsg);
+                    return "ERRO: " + errorMsg;
+                }
+
+                try {
+                    Thread.sleep(1000); // Espera 1 segundo antes de tentar novamente
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            } finally {
+                if (socket != null && !socket.isClosed()) {
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        logManager.warning("Erro ao fechar socket: " + e.getMessage());
+                    }
+                }
+            }
         }
+        return "ERRO: Máximo de tentativas excedido";
     }
+
+
 
     // lookup(hostname):
     //  Envia comando LOOKUP
     // Retorna IP associado ao hostname
     public String lookup(String hostname) {
-        return sendCommand("LOOKUP " + hostname);
+        logManager.info("Executando LOOKUP para hostname: " + hostname);
+        String response = sendCommand("LOOKUP " + hostname);
+        logManager.info("LOOKUP completado - Resultado: " + response);
+        return response;
     }
+
 
     // register(hostname, ip):
     // Envia comando REGISTER
     // Registra novo par hostname->IP
 
     public String register(String hostname, String ip) {
-        return sendCommand("REGISTER " + hostname + " " + ip);
+        logManager.info("Executando REGISTER para " + hostname + " -> " + ip);
+        String response = sendCommand("REGISTER " + hostname + " " + ip);
+        logManager.info("REGISTER completado - Resultado: " + response);
+        return response;
     }
 }
 

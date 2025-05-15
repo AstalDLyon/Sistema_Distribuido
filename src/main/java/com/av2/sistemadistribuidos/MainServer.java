@@ -1,7 +1,8 @@
 package com.av2.sistemadistribuidos;
-import java.io.File;
-import java.sql.SQLOutput;
-import java.util.logging.Logger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 
 /**
  * Classe principal do servidor
@@ -11,17 +12,55 @@ import java.util.logging.Logger;
  */
 
 public class MainServer {
+    private static final LogManager logManager = LogManager.getInstance();
+    private static NomeServidor servidor;
+    private static ExecutorService executorService;
+
     public static void main(String[] args) {
-        final Logger logger = Logger.getLogger(MainServer.class.getName());
-        nomeServidor server = new nomeServidor();
-        // Porta do servidor
+        ConfigManager config = ConfigManager.getInstance();
+        LogManager logManager = LogManager.getInstance();
+
+        logManager.info("Iniciando servidor DNS");
+
+        executorService = Executors.newFixedThreadPool(config.getThreadPoolSize());
+        servidor = new NomeServidor();
+        logManager.info("Servidor configurado na porta " + config.getServerPort() +
+                " com pool de " + config.getThreadPoolSize() + " threads");
 
         try {
-            server.start(); // Inicia o servidor
+            servidor.iniciar(executorService);
         } catch (Exception e) {
-            logger.severe("Erro ao aceitar conexão: " + e.getMessage());
+            logManager.severe("Erro ao iniciar servidor: " + e.getMessage());
+        }
+
+
+        // Registra shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logManager.info("Iniciando processo de shutdown do servidor");
+            encerrarServidor();
+        }));
+
+    }
+
+    private static void encerrarServidor() {
+        try {
+            logManager.info("Parando servidor");
+            servidor.parar();
+
+            logManager.info("Encerrando pool de threads");
+            executorService.shutdown();
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                logManager.warning("Timeout ao aguardar término das threads");
+                executorService.shutdownNow();
+            }
+
+            logManager.info("Servidor encerrado com sucesso");
+        } catch (InterruptedException e) {
+            logManager.severe("Erro durante encerramento do servidor: " + e.getMessage());
+            Thread.currentThread().interrupt();
         }
     }
 }
+
 
 
