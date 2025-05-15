@@ -10,7 +10,6 @@ Cada classe possui uma responsabilidade única e bem definida:
 - **FileManager** – Persistência de dados em arquivo
 - **ConfigManager** – Configurações globais (Singleton, Thread-safe)
 - **LogManager** – Classe que gerencia logs
-- **LogManager** – Classe que gerencia logs
 
 ---
 
