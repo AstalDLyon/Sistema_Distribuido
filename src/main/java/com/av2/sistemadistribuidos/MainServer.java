@@ -1,66 +1,38 @@
 package com.av2.sistemadistribuidos;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-
-/**
- * Classe principal do servidor
- * - Inicializa o servidor de nomes
- * - Configura o logger para registro de erros
- * - Gerencia o ciclo de vida do servidor
- */
+import java.util.logging.Logger;
 
 public class MainServer {
-    private static final LogManager logManager = LogManager.getInstance();
-    private static NomeServidor servidor;
-    private static ExecutorService executorService;
-
     public static void main(String[] args) {
-        ConfigManager config = ConfigManager.getInstance();
-        LogManager logManager = LogManager.getInstance();
+        final Logger logger = Logger.getLogger(MainServer.class.getName());
+        NomeServidor server = new NomeServidor(12345); // Porta do servidor
+        server.registerHost("hostA.local", "192.168.0.1");
+        server.registerHost("hostB.local", "192.168.0.2");
+        server.registerHost("hostC.local", "192.168.0.3");
+        server.registerHost("hostD.local", "192.168.0.4");
+        server.registerHost("hostE.local", "192.168.0.5");
+        server.registerHost("hostF.local", "192.168.0.6");
+        server.registerHost("hostG.local", "192.168.0.7");
+        server.registerHost("hostH.local", "192.168.0.8");
+        server.registerHost("hostI.local", "192.168.0.9");
+        server.registerHost("hostJ.local", "192.168.0.10");
+        server.registerHost("hostK.local", "192.168.0.11");
+        server.registerHost("hostL.local", "192.168.0.12");
+        server.registerHost("hostM.local", "192.168.0.13");
+        server.registerHost("hostN.local", "192.168.0.14");
+        server.registerHost("hostO.local", "192.168.0.15");
+        server.registerHost("hostP.local", "192.168.0.16");
+        server.registerHost("hostQ.local", "192.168.0.17");
+        server.registerHost("hostR.local", "192.168.0.18");
 
-        logManager.info("Iniciando servidor DNS");
-
-        executorService = Executors.newFixedThreadPool(config.getThreadPoolSize());
-        servidor = new NomeServidor();
-        logManager.info("Servidor configurado na porta " + config.getServerPort() +
-                " com pool de " + config.getThreadPoolSize() + " threads");
+        // Alguns exemplos basicos para teste.
 
         try {
-            servidor.iniciar(executorService);
+            server.start(); // Inicia o servidor
         } catch (Exception e) {
-            logManager.severe("Erro ao iniciar servidor: " + e.getMessage());
-        }
-
-
-        // Registra shutdown hook
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logManager.info("Iniciando processo de shutdown do servidor");
-            encerrarServidor();
-        }));
-
-    }
-
-    private static void encerrarServidor() {
-        try {
-            logManager.info("Parando servidor");
-            servidor.parar();
-
-            logManager.info("Encerrando pool de threads");
-            executorService.shutdown();
-            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-                logManager.warning("Timeout ao aguardar término das threads");
-                executorService.shutdownNow();
-            }
-
-            logManager.info("Servidor encerrado com sucesso");
-        } catch (InterruptedException e) {
-            logManager.severe("Erro durante encerramento do servidor: " + e.getMessage());
-            Thread.currentThread().interrupt();
+            logger.severe("Erro ao aceitar conexão: " + e.getMessage());
         }
     }
 }
 
-
+// Se possivel no futuro adicionar persistencia de arquivos no servidor, para manter os DNS e IPs já registrados
 
