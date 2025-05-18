@@ -20,9 +20,6 @@ Cada classe possui uma responsabilidade única e bem definida:
 - [x] Persistência em arquivo  
 - [ ] Replicação entre servidores (servidor distribuído)  
 - [x] Configurações com conformidade Thread-safe  
-- [ ] Cache no cliente  
-- [ ] Autenticação básica  
-- [ ] Interface de testes ou painel web (opcional)  
 - [x] ExecutorService para controlar acessos simultâneos  
 - [x] Timeouts  
 - [x] Logs  
