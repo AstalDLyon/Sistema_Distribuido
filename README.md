@@ -51,6 +51,7 @@ Substitua o caminho acima pelo diretório real do seu projeto.
 ### 4. Em outro terminal, execute outro servidor secundário
 
  ```cd C:\Users\bral\IdeaProjects\Sistema_Distribuido```
+
  ```java com.av2.sistemadistribuidos.MainServer secundario 12347```
 
 
