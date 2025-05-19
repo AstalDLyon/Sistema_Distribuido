@@ -20,7 +20,9 @@ public class MainServer {
         LogManager logManager = LogManager.getInstance(12345);
 
         logManager.info("Iniciando servidor DNS");
-        executorService = Executors.newFixedThreadPool(config.getThreadPoolSize());
+        executorService = Executors.newFixedThreadPool(config.getThreadPoolSize());// Inicializa pool de threads com tamanho fixo
+// Controla número máximo de conexões simultâneas
+
 
         // Verifica se é servidor secundário pelos argumentos
         if (args.length > 0 && args[0].equals("secundario")) {

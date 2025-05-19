@@ -39,7 +39,10 @@ public class LogManager {
 
 
 
-    private void configurarLogger() {
+    private void configurarLogger() {// Configura sistema de logs
+        // Organiza logs por data e porta do servidor
+        // Implementa rotação de arquivos de log
+
         try {
             String logDirectory = "logs/servidor_" + porta;
             Path logsDir = Paths.get(logDirectory);

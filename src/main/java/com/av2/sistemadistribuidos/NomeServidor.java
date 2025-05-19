@@ -56,7 +56,10 @@ public class NomeServidor {
         }
     }
 
-    public void parar() {
+    public void parar() {// Méto-do para shutdown gracioso do servidor
+        // Aguarda finalização de threads por até 60 segundos
+        // Força encerramento após timeout
+
         running = false;
         if (executorService != null) {
             executorService.shutdown();
@@ -78,6 +81,8 @@ public class NomeServidor {
     //  Verifica duplicatas
     //  Persiste registro em arquivo
     //  Thread-safe usando synchronized
+    // Méto-do crítico para sincronização de registros entre threads
+    // Garante consistência ao registrar novos hosts
     protected boolean registerHost(String hostname, String ip) {
         logManager.info(String.format("Tentativa de registro: %s -> %s", hostname, ip));
         if (hostname == null || hostname.trim().isEmpty()) {

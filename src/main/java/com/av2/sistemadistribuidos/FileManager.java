@@ -13,6 +13,9 @@ public class FileManager {
     private final LogManager logManager;
 
     // Padrão para validar endereços IP
+    // Regex para validar endereços IP no formato IPv4
+    // Aceita valores entre 0-255 para cada octeto
+
     private static final Pattern IP_PATTERN = Pattern.compile(
             "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
     );
@@ -31,7 +34,9 @@ public class FileManager {
     }
 
     private void criarArquivoSeNecessario() {
-        lock.writeLock().lock();
+        lock.writeLock().lock();// Bloco crítico para escrita em arquivo
+        // Previne condições de corrida durante operações de I/O
+
         try {
             Path path = Paths.get(filePath);
             if (!Files.exists(path)) {
@@ -47,7 +52,9 @@ public class FileManager {
         }
     }
 
-    private boolean isHostnameInvalido(String hostname) {
+    private boolean isHostnameInvalido(String hostname) {// Validação de hostname conforme padrões DNS
+        // Verifica formato, comprimento e caracteres permitidos
+
         return hostname == null ||
                 hostname.trim().isEmpty() ||
                 !HOSTNAME_PATTERN.matcher(hostname).matches() ||
