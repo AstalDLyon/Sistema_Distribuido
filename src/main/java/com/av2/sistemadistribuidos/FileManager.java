@@ -22,10 +22,11 @@ public class FileManager {
             "^[a-zA-Z0-9]([a-zA-Z0-9\\-.]{0,61}[a-zA-Z0-9])?$"
     );
 
-    public FileManager(String filePath) {
-        this.filePath = filePath;
+    public FileManager(String filePath, int porta) {
+        // Adiciona a porta ao nome do arquivo
+        this.filePath = filePath + "_" + porta;
         this.lock = new ReentrantReadWriteLock();
-        this.logManager = LogManager.getInstance();
+        this.logManager = LogManager.getInstance(porta);
         criarArquivoSeNecessario();
     }
 

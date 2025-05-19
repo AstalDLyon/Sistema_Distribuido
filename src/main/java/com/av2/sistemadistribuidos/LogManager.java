@@ -7,46 +7,59 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 public class LogManager {
-    private static LogManager instance;
+    private static final Map<Integer, LogManager> instances = new ConcurrentHashMap<>();
     private final Logger logger;
+    private final int porta;
 
-    private LogManager() {
-        this.logger = Logger.getLogger("ServidorLogger");
+    private LogManager(int porta) {
+        this.porta = porta;
+        this.logger = Logger.getLogger("ServidorLogger_" + porta);
         configurarLogger();
     }
-
+/* A implementação a baixo foi feita usando a porta padrão diretamente.
+* Com intuito de evitar uma dependencia circular,
+*  ja que o LogManager depende do ConfigManager para obter uma porta padrão
+* e o config manager depende do log para registrar... logs.
+* Implementando desse jeito eu evito a dependencia circular.
+* É elegante? não, mas serve o proposito*/
     public static synchronized LogManager getInstance() {
-        if (instance == null) {
-            instance = new LogManager();
-        }
-        return instance;
+        int portaPadrao = 12345; // Define a porta padrão diretamente
+        return getInstance(portaPadrao);
     }
+
+    public static synchronized LogManager getInstance(int porta) {
+        return instances.computeIfAbsent(porta, LogManager::new);
+
+    }
+
+
 
     private void configurarLogger() {
         try {
-            String logDirectory = "logs"; // Convertido para variável local
-            // Criar diretório de logs
+            String logDirectory = "logs/servidor_" + porta;
             Path logsDir = Paths.get(logDirectory);
 
             if (!Files.exists(logsDir)) {
                 Files.createDirectories(logsDir);
             }
 
-            // Nome do arquivo de log
-            String nomeArquivo = String.format("%s/servidor_%s.txt",
+            String nomeArquivo = String.format("%s/servidor_%d_%s.txt",
                     logDirectory,
+                    porta,
                     new SimpleDateFormat("yyyyMMdd").format(new Date()));
 
             FileHandler fileHandler = criarFileHandler(nomeArquivo);
             logger.setUseParentHandlers(false);
             logger.addHandler(fileHandler);
 
-            info("Sistema de logs inicializado com sucesso");
-
+            info("Sistema de logs inicializado para servidor na porta " + porta);
         } catch (IOException e) {
-            System.err.println("Erro ao configurar sistema de logs: " + e.getMessage());
+            System.err.println("Erro ao configurar sistema de logs para porta " + porta + ": " + e.getMessage());
         }
     }
 
@@ -69,7 +82,6 @@ public class LogManager {
             }
         };
     }
-
 
     // Métodos para logging
     public void info(String mensagem) {
