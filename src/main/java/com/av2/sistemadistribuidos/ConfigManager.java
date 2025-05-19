@@ -3,17 +3,24 @@ package com.av2.sistemadistribuidos;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ConfigManager {
-    private static final Properties properties = new Properties();
-    private static ConfigManager instance;
-    private final LogManager logManager = LogManager.getInstance();
+    private static final Map<Integer, ConfigManager> instances = new ConcurrentHashMap<>();
+    private final Properties properties;
+    private final LogManager logManager;
+    private final int porta;
 
 
-    private ConfigManager() { // impede criação direta de instancia
+    private ConfigManager(int porta) {
+        this.porta = porta;
+        this.properties = new Properties();
+        this.logManager = LogManager.getInstance(porta);
         loadProperties();
     }
- /*
+
+    /*
    O metodo getInstance DEVE SER SEMPRE SINCRONIZADO para evitar problemas de condição de corrida E consistencia de dados
    lembrando que estamos a simular um servidor
    Exemplos de possiveis problemas caso não esteja sincronizado:
@@ -38,35 +45,43 @@ public class ConfigManager {
 
 
  */
-    public static synchronized ConfigManager getInstance() {
-        if (instance == null) { /* garante a integridade das configurações para que a instância seja unica
-        ja que a mesma gerencia conexões, quantidade de threads e caminho do arquivo
-        */
-            instance = new ConfigManager();
-        }
-        return instance;
+    public static synchronized ConfigManager getInstance(int porta) {
+        return instances.computeIfAbsent(porta, ConfigManager::new);
     }
+
 
     private void loadProperties() {
         try (InputStream input = getClass().getClassLoader()
-                .getResourceAsStream("config.properties")) {
+                .getResourceAsStream("config_" + porta + ".properties")) {
             if (input == null) {
-                logManager.severe("Arquivo config.properties não encontrado!");
-                return;
+                // Se não encontrar arquivo específico, carrega o padrão
+                try (InputStream defaultInput = getClass().getClassLoader()
+                        .getResourceAsStream("config.properties")) {
+                    if (defaultInput != null) {
+                        properties.load(defaultInput);
+                    } else {
+                        logManager.severe("Arquivo config.properties não encontrado!");
+                    }
+                }
+            } else {
+                properties.load(input);
             }
-            properties.load(input);
         } catch (IOException e) {
             logManager.severe("Erro ao carregar configurações: " + e.getMessage());
         }
     }
 
-    public int getServerPort() {
-        return Integer.parseInt(properties.getProperty("server.port", "12345"));
+    public String getFilePath() {
+        return properties.getProperty("server.file.path", "src/main/resources/registros_" + porta + ".txt");
     }
 
-    public String getFilePath() {
-        return properties.getProperty("server.file.path", "src/main/resources/registros.txt");
+    public int getServerPort() {
+
+        return Integer.parseInt(properties.getProperty("server.port", String.valueOf(porta)));
+
     }
+
+
 
     public int getThreadPoolSize() {
         return Integer.parseInt(properties.getProperty("server.thread.pool.size", "10"));

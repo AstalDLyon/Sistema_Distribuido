@@ -20,11 +20,11 @@ public class NomeServidor {
     private ExecutorService executorService;
     private volatile boolean running;
 
-    public NomeServidor() {
-        this.logManager = LogManager.getInstance();
-        this.config = ConfigManager.getInstance();
-        this.fileManager = new FileManager(config.getFilePath());
-        logManager.info(("NomeServidor inicializado"));
+    public NomeServidor(int porta) {
+        this.logManager = LogManager.getInstance(porta);
+        this.config = ConfigManager.getInstance(porta);
+        this.fileManager = new FileManager(config.getFilePath(), porta);
+        logManager.info(("NomeServidor inicializado na porta" + porta));
     }
 
     public void iniciar(ExecutorService executorService) {
@@ -78,7 +78,7 @@ public class NomeServidor {
     //  Verifica duplicatas
     //  Persiste registro em arquivo
     //  Thread-safe usando synchronized
-    private boolean registerHost(String hostname, String ip) {
+    protected boolean registerHost(String hostname, String ip) {
         logManager.info(String.format("Tentativa de registro: %s -> %s", hostname, ip));
         if (hostname == null || hostname.trim().isEmpty()) {
             logManager.warning("Hostname inválido ou vazio");
@@ -131,7 +131,7 @@ public class NomeServidor {
     //  Parse de comandos LOOKUP e REGISTER
     // Envia respostas ao cliente
 
-    private void handleClient(Socket clientSocket) {
+    protected void handleClient(Socket clientSocket) {
         String clientAddress = clientSocket.getInetAddress().getHostAddress();
         logManager.info("Processando cliente: " + clientAddress);
 

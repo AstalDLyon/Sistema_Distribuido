@@ -10,7 +10,7 @@ public class DNSSystemTest {
     public DNSSystemTest() {
         this.resolver = new Resolver("localhost", 12345);
         this.resultados = new ArrayList<>();
-        LogManager.getInstance().info("Iniciando suite de testes do sistema DNS");
+        LogManager.getInstance(12345).info("Iniciando suite de testes do sistema DNS");
     }
 
     private record TesteResultado(String descricao, boolean sucesso, String mensagemErro) {
@@ -40,8 +40,15 @@ public class DNSSystemTest {
     public void executarTodosTestes() {
         System.out.println("\n=== Iniciando Testes do Sistema DNS ===\n");
 
+        executarTeste("Conectividade com servidor", () -> {
+            String resultado = resolver.lookup("test");
+            verificar(!resultado.startsWith("ERRO:"),
+                    "Servidor não está respondendo");
+        });
+
+
         executarTeste("Registro de novo host", () -> {
-            String resultado = resolver.register("testhost2", "192.168.1.100"); // mude aqui para testar
+            String resultado = resolver.register("testhost1", "192.168.1.100"); // mude aqui para testar
             verificar(resultado.equals("Registrado"),
                     "Esperado 'Registrado', obtido '" + resultado + "'");
         });

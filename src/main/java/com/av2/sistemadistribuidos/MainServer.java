@@ -12,37 +12,51 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class MainServer {
-    private static final LogManager logManager = LogManager.getInstance();
-    private static NomeServidor servidor;
+    private static final LogManager logManager = LogManager.getInstance(12345);
     private static ExecutorService executorService;
 
     public static void main(String[] args) {
-        ConfigManager config = ConfigManager.getInstance();
-        LogManager logManager = LogManager.getInstance();
+        ConfigManager config = ConfigManager.getInstance(12345);
+        LogManager logManager = LogManager.getInstance(12345);
 
         logManager.info("Iniciando servidor DNS");
-
         executorService = Executors.newFixedThreadPool(config.getThreadPoolSize());
-        servidor = new NomeServidor();
-        logManager.info("Servidor configurado na porta " + config.getServerPort() +
-                " com pool de " + config.getThreadPoolSize() + " threads");
 
+        // Verifica se é servidor secundário pelos argumentos
+        if (args.length > 0 && args[0].equals("secundario")) {
+            try {
+                int porta = Integer.parseInt(args[1]);
+                ServidorReplicado servidorSecundario = new ServidorReplicado(false, porta);
+                iniciarServidor(servidorSecundario, porta);
+            } catch (NumberFormatException e) {
+                logManager.severe("Porta inválida: " + args[1]);
+
+            }
+        } else {
+            int portaPrimaria = config.getServerPort();
+            ServidorReplicado servidorPrimario = new ServidorReplicado(true, portaPrimaria);
+            servidorPrimario.adicionarServidorSecundario("localhost", 12346);
+            servidorPrimario.adicionarServidorSecundario("localhost", 12347);
+            iniciarServidor(servidorPrimario, portaPrimaria);
+        }
+
+    }
+
+    private static void iniciarServidor(NomeServidor servidor, int porta) {
         try {
+            logManager.info("Iniciando servidor na porta " + porta);
             servidor.iniciar(executorService);
         } catch (Exception e) {
             logManager.severe("Erro ao iniciar servidor: " + e.getMessage());
         }
 
-
-        // Registra shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logManager.info("Iniciando processo de shutdown do servidor");
-            encerrarServidor();
+            encerrarServidor(servidor);
         }));
-
     }
 
-    private static void encerrarServidor() {
+    private static void encerrarServidor(NomeServidor servidor) {
         try {
             logManager.info("Parando servidor");
             servidor.parar();
@@ -61,6 +75,5 @@ public class MainServer {
         }
     }
 }
-
 
 
