@@ -10,6 +10,8 @@ Cada classe possui uma responsabilidade única e bem definida:
 - **FileManager** – Persistência de dados em arquivo
 - **ConfigManager** – Configurações globais (Singleton, Thread-safe)
 - **LogManager** – Classe que gerencia logs
+- **DNSSystemTest** Classe usada para testes.
+- **ServidorReplicado** Classe encarregada de replicar os servidores pra evitar falhas.
 
 ---
 
