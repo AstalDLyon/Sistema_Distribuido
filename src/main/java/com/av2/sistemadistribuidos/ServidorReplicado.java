@@ -39,10 +39,13 @@ public class ServidorReplicado extends NomeServidor {
         return resultado;
     }
 
-    private void replicarRegistro(String hostname, String ip) {
+    private void replicarRegistro(String hostname, String ip) {  // Méto-do responsável por replicar registros para servidores secundários
+        // Implementa mecanismo de tolerância a falhas
+        // Timeout configurado para 5 segundos por tentativa
+
         for (EnderecoServidor servidor : servidoresSecundarios) {
             try (Socket socket = new Socket(servidor.host(), servidor.porta())) {
-                socket.setSoTimeout(5000); // Adicione esta linha aqui
+                socket.setSoTimeout(5000);
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(socket.getInputStream()));
