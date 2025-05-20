@@ -96,6 +96,29 @@ public class Resolver {
         return response;
     }
 
+    private String validarIPv4(String ip) {
+        if (ip == null || ip.trim().isEmpty()) {
+            return "Erro: endereço IP não pode ser vazio";
+        }
+
+        String[] octetos = ip.split("\\.");
+        if (octetos.length != 4) {
+            return "Erro: endereço IPv4 deve ter 4 octetos";
+        }
+
+        try {
+            for (String octeto : octetos) {
+                int valor = Integer.parseInt(octeto);
+                if (valor < 0 || valor > 255) {
+                    return "Erro: cada octeto deve estar entre 0 e 255";
+                }
+            }
+            return null; // IP válido
+        } catch (NumberFormatException e) {
+            return "Erro: octeto inválido no endereço IP";
+        }
+    }
+
 
     // register(hostname, ip):
     // Envia comando REGISTER
@@ -103,10 +126,18 @@ public class Resolver {
 
     public String register(String hostname, String ip) {
         logManager.info("Executando REGISTER para " + hostname + " -> " + ip);
+
+        String erroIP = validarIPv4(ip);
+        if (erroIP != null) {
+            logManager.warning("Tentativa de registro com IP inválido: " + ip);
+            return erroIP;
+        }
+
         String response = sendCommand("REGISTER " + hostname + " " + ip);
         logManager.info("REGISTER completado - Resultado: " + response);
         return response;
     }
+
 }
 
 
