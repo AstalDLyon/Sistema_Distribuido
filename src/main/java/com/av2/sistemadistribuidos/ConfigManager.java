@@ -21,9 +21,6 @@ public class ConfigManager {
     }
 
     /*
-   O metodo getInstance DEVE SER SEMPRE SINCRONIZADO para evitar problemas de condição de corrida E consistencia de dados
-   lembrando que estamos a simular um servidor
-   Exemplos de possiveis problemas caso não esteja sincronizado:
 
    Problema de condição de corrida: Sem thread-safety, pode rolar o seguinte problema:
     - Thread 1 verifica "if (instance == null) -> true"
@@ -39,15 +36,24 @@ public class ConfigManager {
     - E outra vê 2000ms
     - Isso pode causar comportamentos inconsistentes no servidor
 
+    1. O méto-do `computeIfAbsent` do já é thread-safe por natureza.
+     Ele garante atomicidade na operação de verificar se a chave existe e,
+      caso não exista, criar uma nova entrada. `ConcurrentHashMap`
+
+    - A consistência é garantida pelo `ConcurrentHashMap`
+    - Cada porta terá sua única instância de `ConfigManager`
+    - As configurações carregadas permanecerão consistentes para cada porta
+
 
     Obviamente como isso não é um codigo comercial, será quase impossivel ocorrer esses problemas,
      desde que não se mexa nas configurações, porém serve de aprendizado.
 
 
  */
-    public static synchronized ConfigManager getInstance(int porta) {
+    public static ConfigManager getInstance(int porta) {
         return instances.computeIfAbsent(porta, ConfigManager::new);
     }
+
 
 
     private void loadProperties() {
