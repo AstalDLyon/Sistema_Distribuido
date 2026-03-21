@@ -27,7 +27,7 @@ Cada classe possui uma responsabilidade única e bem definida:
 - [x] Logs
 
 ---
-# 🧪 Tutorial de Teste dos Servidores Secundários
+#  Tutorial de Teste dos Servidores Secundários
 
 Após iniciar o **MainServer** (sem parâmetros), siga os passos abaixo para rodar os servidores secundários:
 
