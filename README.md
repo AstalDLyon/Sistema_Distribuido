@@ -1,6 +1,6 @@
 # Projeto de Sistema Distribuído
 
-## 📌 Arquitetura baseada nos princípios SOLID
+##  Arquitetura baseada nos princípios SOLID
 
 Cada classe possui uma responsabilidade única e bem definida:
 
@@ -15,7 +15,7 @@ Cada classe possui uma responsabilidade única e bem definida:
 
 ---
 
-## ✅ Funcionalidades
+##  Funcionalidades
 
 - [x] Registro de IP com nome  
 - [x] Consulta com sockets  
@@ -33,7 +33,7 @@ Após iniciar o **MainServer** (sem parâmetros), siga os passos abaixo para rod
 
 ---
 
-## ✅ Passo a Passo
+##  Passo a Passo
 
 ### 1. Acesse o diretório do seu projeto
 
